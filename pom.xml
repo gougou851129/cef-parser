@@ -25,11 +25,11 @@
         <artifactId>maven-central-parent</artifactId>
         <version>1.0.0.0</version>
     </parent>
-    <groupId>com.github.jcustenborder</groupId>
+    <groupId>org.graylog.cef</groupId>
     <artifactId>cef-parser</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1.8-SNAPSHOT</version>
     <name>cef-parserImpl</name>
-    <url>https://github.com/jcustenborder/cef-parser</url>
+    <url>https://github.com/graylog-labs/cef-parser</url>
     <inceptionYear>2017</inceptionYear>
     <licenses>
         <license>
@@ -49,13 +49,13 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:https://github.com/jcustenborder/cef-parser.git</connection>
-        <developerConnection>scm:git:git@github.com:jcustenborder/cef-parser.git</developerConnection>
-        <url>https://github.com/jcustenborder/cef-parser</url>
+        <connection>scm:git:https://github.com/graylog-labs/cef-parser.git</connection>
+        <developerConnection>scm:git:git@github.com:graylog-labs/cef-parser.git</developerConnection>
+        <url>https://github.com/graylog-labs/cef-parser</url>
     </scm>
     <issueManagement>
         <system>github</system>
-        <url>https://github.com/jcustenborder/cef-parser/issues</url>
+        <url>https://github.com/graylog-labs/cef-parser/issues</url>
     </issueManagement>
     <properties>
         <slf4j.version>1.7.25</slf4j.version>
