@@ -28,7 +28,7 @@
     <groupId>org.graylog.cef</groupId>
     <artifactId>cef-parser</artifactId>
     <version>0.0.1.8-SNAPSHOT</version>
-    <name>cef-parserImpl</name>
+    <name>cef-parser</name>
     <url>https://github.com/graylog-labs/cef-parser</url>
     <inceptionYear>2017</inceptionYear>
     <licenses>
