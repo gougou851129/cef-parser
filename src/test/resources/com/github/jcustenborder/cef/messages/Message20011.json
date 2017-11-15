@@ -1,8 +1,7 @@
 {
-  "input" : "Nov 15 12:40:18.000 UTC hostname.example.com ASM:CEF:0|F5|ASM|10.1.0|Illegal query string length|Illegal query string length|6|dvchost=3600.lab.asm.f5net.com dvc=172.30.0.20",
+  "input" : "Nov 15 12:40:18 ASM:CEF:0|F5|ASM|10.1.0|Illegal query string length|Illegal query string length|6|dvchost=3600.lab.asm.f5net.com dvc=172.30.0.20",
   "expected" : {
     "timestamp" : 1510749618000,
-    "host" : "hostname.example.com",
     "cefVersion" : 0,
     "deviceVendor" : "F5",
     "deviceProduct" : "ASM",

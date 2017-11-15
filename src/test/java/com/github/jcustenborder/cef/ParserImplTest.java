@@ -75,6 +75,7 @@ public class ParserImplTest {
 
     Date date = calendar.getTime();
     final String testInputformat = "%s hostname.example.com %s";
+    final String testInputformatWithoutHostname = "%s %s";
     final String testFileNameFormat = "Message%04d.json";
     final File outputRoot = new File("src/test/resources/com/github/jcustenborder/cef/messages");
 
@@ -105,6 +106,8 @@ public class ParserImplTest {
 
       String testFileName = String.format(testFileNameFormat, testNumber);
       File outputPath = new File(outputRoot, testFileName);
+
+      // Standard CEF
       TestCase testCase = (TestCase) kvp.getValue().clone();
       when(testCase.expected.timestamp()).thenReturn(date);
       when(testCase.expected.host()).thenReturn("hostname.example.com");
@@ -124,6 +127,17 @@ public class ParserImplTest {
         ObjectMapperFactory.INSTANCE.writeValue(outputPath, testCase);
       }
 
+      // OSSEC
+      testNumber += 1000;
+      testFileName = String.format(testFileNameFormat, testNumber);
+      outputPath = new File(outputRoot, testFileName);
+      testCase = (TestCase) kvp.getValue().clone();
+      when(testCase.expected.host()).thenReturn(null);
+      DateFormat ossecDateFormat = new SimpleDateFormat("MMM dd HH:mm:ss");
+      ossecDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+      testCase.input = String.format(testInputformatWithoutHostname, ossecDateFormat.format(date), testCase.input);
+
+      ObjectMapperFactory.INSTANCE.writeValue(outputPath, testCase);
     }
 
   }

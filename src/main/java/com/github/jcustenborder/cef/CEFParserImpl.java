@@ -36,6 +36,8 @@ class CEFParserImpl implements CEFParser {
   private static final Locale DEFAULT_LOCALE = Locale.ROOT;
   private static final Logger log = LoggerFactory.getLogger(CEFParserImpl.class);
   private static final Pattern PATTERN_CEF_PREFIX = Pattern.compile("^((?<timestamp>.+)\\s+(?<host>\\S+)\\s+).*?(?<cs0>CEF:\\d+)|^.*?(?<cs1>CEF:\\d+)");
+  private static final Pattern PATTERN_OSSEC_PREFIX = Pattern.compile("^(?<timestamp>[A-Za-z]+\\s+\\d{1,2}\\s+\\d{1,2}:\\d{2}:\\d{2})\\s+(?:ASM:)?(?<cs>CEF:\\d+)");
+
   private static final Pattern PATTERN_CEF_MAIN = Pattern.compile("(?<!\\\\)\\|");
   private static final Pattern PATTERN_EXTENSION = Pattern.compile("(\\w+)=");
   private static final List<String> DATE_FORMATS = Arrays.asList(
@@ -64,7 +66,6 @@ class CEFParserImpl implements CEFParser {
     this.messageFactory = messageFactory;
   }
 
-
   @Override
   public Message parse(final String event) {
     return parse(event, DEFAULT_TIME_ZONE, DEFAULT_LOCALE);
@@ -73,18 +74,51 @@ class CEFParserImpl implements CEFParser {
   @Override
   public Message parse(final String event, final TimeZone timeZone, final Locale locale) {
     log.trace("parse('{}')", event);
-    Matcher prefixMatcher = PATTERN_CEF_PREFIX.matcher(event);
-    if (!prefixMatcher.find()) {
-      log.trace("parse() - event does not match pattern '{}'.", PATTERN_CEF_PREFIX.pattern());
+    final Matcher ossecPrefixMatcher = PATTERN_OSSEC_PREFIX.matcher(event);
+    final Matcher prefixMatcher = PATTERN_CEF_PREFIX.matcher(event);
+    final String timestampText;
+    final String host;
+    final boolean isOssec;
+    if (ossecPrefixMatcher.find()) {
+      log.trace("parse() - event matches OSSEC pattern '{}'.", PATTERN_OSSEC_PREFIX.pattern());
+      timestampText = ossecPrefixMatcher.group("timestamp");
+      host = null;
+      isOssec = true;
+    } else if (prefixMatcher.find()) {
+      log.trace("parse() - event matches standard CEF pattern '{}'.", PATTERN_CEF_PREFIX.pattern());
+      timestampText = prefixMatcher.group("timestamp");
+      host = prefixMatcher.group("host");
+      isOssec = false;
+    } else {
+      log.trace("parse() - event does not match any pattern '{}' or '{}'.", PATTERN_OSSEC_PREFIX.pattern(), PATTERN_CEF_PREFIX.pattern());
       return null;
     }
-    final String timestampText = prefixMatcher.group("timestamp");
-    final String host = prefixMatcher.group("host");
     log.trace("parse() - timestampText = '{}' host='{}'", timestampText, host);
     Message.Builder builder = this.messageFactory.newBuilder();
 
     final int cefstartIndex;
-    if (timestampText != null && !timestampText.isEmpty() && host != null && !host.isEmpty()) {
+    if (isOssec) {
+      final String df = "MMM dd HH:mm:ss";
+      final SimpleDateFormat dateFormat = new SimpleDateFormat(df);
+      dateFormat.setTimeZone(timeZone);
+      final Date timestamp;
+      try {
+        final Calendar calendar = Calendar.getInstance(timeZone);
+        int thisYear = calendar.get(Calendar.YEAR);
+        calendar.setTime(dateFormat.parse(timestampText));
+        log.trace("parse() - altering year from to {}", thisYear);
+        calendar.set(Calendar.YEAR, thisYear);
+        timestamp = calendar.getTime();
+      } catch (ParseException e) {
+        log.trace("parse() - Could not parse '{}' with '{}'.", timestampText, df);
+        throw new IllegalStateException("Could not parse timestamp. '" + timestampText + "'");
+      }
+
+      log.trace("parse() - timestamp = {}, {}", timestamp.getTime(), timestamp);
+      builder.timestamp(timestamp);
+
+      cefstartIndex = ossecPrefixMatcher.start("cs");
+    } else if (timestampText != null && !timestampText.isEmpty() && host != null && !host.isEmpty()) {
       Long longTimestamp = null;
       try {
         longTimestamp = Long.parseLong(timestampText);
@@ -98,8 +132,6 @@ class CEFParserImpl implements CEFParser {
       } else {
         log.trace("parse() - Trying to parse the timestamp.");
         // SimpleDateFormat is not threadsafe so we have to create them each time.
-
-
         for (String df : DATE_FORMATS) {
           SimpleDateFormat dateFormat = new SimpleDateFormat(df, locale);
           dateFormat.setTimeZone(timeZone);
