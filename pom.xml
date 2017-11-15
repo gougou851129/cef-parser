@@ -25,7 +25,7 @@
     </parent>
     <groupId>org.graylog.cef</groupId>
     <artifactId>cef-parser</artifactId>
-    <version>0.0.1.10-SNAPSHOT</version>
+    <version>0.0.1.10</version>
     <name>cef-parser</name>
     <url>https://github.com/graylog-labs/cef-parser</url>
     <inceptionYear>2017</inceptionYear>
@@ -50,7 +50,7 @@
         <connection>scm:git:https://github.com/graylog-labs/cef-parser.git</connection>
         <developerConnection>scm:git:git@github.com:graylog-labs/cef-parser.git</developerConnection>
         <url>https://github.com/graylog-labs/cef-parser</url>
-        <tag>HEAD</tag>
+        <tag>cef-parser-0.0.1.10</tag>
     </scm>
     <issueManagement>
         <system>github</system>
